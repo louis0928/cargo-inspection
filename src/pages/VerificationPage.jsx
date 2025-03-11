@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import useAuth from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +69,7 @@ export default function VerificationPage() {
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const siteArr = ["MD", "SC", "IL"];
+  const { auth } = useAuth();
 
   // Mapping of status values
   const statusMapping = {
@@ -82,7 +84,14 @@ export default function VerificationPage() {
     const fetchYears = async () => {
       try {
         const response = await axios.get(
-          "https://integration.eastlandfood.com/efc/cargo-inspection/validationDropdown"
+          "https://integration.eastlandfood.com/efc/cargo-inspection/validationDropdown",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         const availableYears = [
           ...new Set(response.data.map((item) => item.year.toString())),
@@ -111,7 +120,14 @@ export default function VerificationPage() {
         setNoRecords(false);
         try {
           const response = await axios.get(
-            `https://integration.eastlandfood.com/efc/cargo-inspection/outbounds/${selectedYear}${selectedMonth}/${selectedSite}`
+            `https://integration.eastlandfood.com/efc/cargo-inspection/outbounds/${selectedYear}${selectedMonth}/${selectedSite}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${auth.accessToken}`,
+              },
+              withCredentials: true,
+            }
           );
           if (response.data.length === 0) {
             setNoRecords(true);
@@ -135,7 +151,14 @@ export default function VerificationPage() {
     const getVerificationData = async () => {
       try {
         const response = await axios.get(
-          `https://integration.eastlandfood.com/efc/cargo-inspection/verification/${selectedYear}${selectedMonth}/${selectedSite}`
+          `https://integration.eastlandfood.com/efc/cargo-inspection/verification/${selectedYear}${selectedMonth}/${selectedSite}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         if (response.data && response.data.length > 0) {
           setVericationData(response.data[0]);
@@ -173,7 +196,14 @@ export default function VerificationPage() {
     try {
       await axios.post(
         `https://integration.eastlandfood.com/efc/cargo-inspection/pdfVerification`,
-        pdfData
+        pdfData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       alert("Pdf has been sent to google drive");
     } catch (error) {
@@ -223,7 +253,9 @@ export default function VerificationPage() {
         {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
           },
+          withCredentials: true,
         }
       );
       alert("Verification successful!");
@@ -385,19 +417,18 @@ export default function VerificationPage() {
                             </TableCell>
                             <TableCell className="px-4 py-2 whitespace-nowrap text-left">
                               <span
-                                className={`inline-flex items-center px-2 py-1 rounded-full text-sm ${
-                                  outbound.outbound_status === 0
-                                    ? "bg-green-50 text-green-700"
-                                    : outbound.outbound_status === 1
+                                className={`inline-flex items-center px-2 py-1 rounded-full text-sm ${outbound.outbound_status === 0
+                                  ? "bg-green-50 text-green-700"
+                                  : outbound.outbound_status === 1
                                     ? "bg-yellow-50 text-yellow-700"
                                     : outbound.outbound_status === 2
-                                    ? "bg-blue-50 text-blue-700"
-                                    : outbound.outbound_status === 3
-                                    ? "bg-red-50 text-red-700"
-                                    : outbound.outbound_status === 4
-                                    ? "bg-gray-200 text-gray-900"
-                                    : "bg-purple-50 text-purple-700"
-                                }`}
+                                      ? "bg-blue-50 text-blue-700"
+                                      : outbound.outbound_status === 3
+                                        ? "bg-red-50 text-red-700"
+                                        : outbound.outbound_status === 4
+                                          ? "bg-gray-200 text-gray-900"
+                                          : "bg-purple-50 text-purple-700"
+                                  }`}
                               >
                                 {statusMapping[outbound.outbound_status] ||
                                   "Unknown"}
@@ -470,9 +501,9 @@ export default function VerificationPage() {
                 value={
                   verificationData?.verification_date
                     ? format(
-                        new Date(verificationData.verification_date),
-                        "yyyy-MM-dd"
-                      )
+                      new Date(verificationData.verification_date),
+                      "yyyy-MM-dd"
+                    )
                     : format(new Date(), "yyyy-MM-dd")
                 }
                 readOnly

@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import useAuth from "@/hooks/useAuth";
 import axios from "axios";
 import {
   Clock,
@@ -56,12 +57,19 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
+  const { auth } = useAuth();
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
       const response = await axios.get(
-        "https://integration.eastlandfood.com/efc/cargo-inspection/outbounds"
+        "https://integration.eastlandfood.com/efc/cargo-inspection/outbounds", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        withCredentials: true,
+      }
       );
       setOutboundData(response.data);
     } catch (error) {
@@ -451,9 +459,8 @@ function StatsCard({
 
   return (
     <Card
-      className={`${colorStyles[color]} ${
-        isActive ? "ring-2 ring-primary ring-offset-2" : ""
-      } transition-all hover:shadow-md cursor-pointer`}
+      className={`${colorStyles[color]} ${isActive ? "ring-2 ring-primary ring-offset-2" : ""
+        } transition-all hover:shadow-md cursor-pointer`}
       onClick={onClick}
     >
       <CardContent className="p-6">

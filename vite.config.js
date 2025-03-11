@@ -15,4 +15,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    host: "0.0.0.0", // This allows access from any IP address
+    allowedHosts: ["cargo.eastlandfood.com"],
+  },
 });

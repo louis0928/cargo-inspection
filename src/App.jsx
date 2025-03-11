@@ -4,7 +4,7 @@ import { ModernNavbar } from "./components/ModernNavbar";
 import { OutboundLoadingSummaryForm } from "./pages/OutboundPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
-//import { ReviewPage } from "./pages/ReviewPage";
+import PageDoesNotExist from "./pages/PageDoesNotExist";
 import ValidationPage from "./pages/ValidationPage";
 import VerificationPage from "./pages/VerificationPage";
 import { Routes, Route } from "react-router-dom";
@@ -36,7 +36,7 @@ function App() {
             />
             <Route path="/outbound" element={<OutboundLoadingSummaryForm />} />
           </Route>
-          <Route element={<RequireAuth allowedRoles={["TEST"]} />}>
+          <Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
             <Route path="/validation" element={<ValidationPage />} />
             <Route
               path="/validation/:selectedYear/:selectedSite"
@@ -50,7 +50,7 @@ function App() {
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Route>
-        {/* <Route path="*" element={<PageDoesNotExist />} /> */}
+        <Route path="*" element={<PageDoesNotExist />} />
       </Routes>
     </>
   );

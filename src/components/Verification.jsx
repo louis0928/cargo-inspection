@@ -37,129 +37,6 @@ export default function VerificationPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 10;
 
-  const outbounds = [
-    {
-      routeNumber: "001",
-      date: "2023-05-01",
-      inspectorName: "John Doe",
-      status: "Completed",
-    },
-    {
-      routeNumber: "002",
-      date: "2023-05-02",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "003",
-      date: "2023-05-03",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "004",
-      date: "2023-05-04",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "005",
-      date: "2023-05-05",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "006",
-      date: "2023-05-06",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "007",
-      date: "2023-05-07",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "008",
-      date: "2023-05-08",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "009",
-      date: "2023-05-09",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "010",
-      date: "2023-05-10",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "011",
-      date: "2023-05-11",
-      inspectorName: "John Doe",
-      status: "Completed",
-    },
-    {
-      routeNumber: "012",
-      date: "2023-05-12",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "013",
-      date: "2023-05-13",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "014",
-      date: "2023-05-14",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "015",
-      date: "2023-05-15",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "016",
-      date: "2023-05-16",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "017",
-      date: "2023-05-17",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "018",
-      date: "2023-05-18",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "019",
-      date: "2023-05-19",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-    {
-      routeNumber: "020",
-      date: "2023-05-20",
-      inspectorName: "Jane Smith",
-      status: "Pending",
-    },
-  ];
-
   const handleCreateVerification = () => {
     if (!/^\d{6}$/.test(verificationName)) {
       alert("Please enter a valid verification name in YYYYMM format");
@@ -260,11 +137,10 @@ export default function VerificationPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-sm ${
-                                outbound.status === "Completed"
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-sm ${outbound.status === "Completed"
                                   ? "bg-green-50 text-green-700"
                                   : "bg-yellow-50 text-yellow-700"
-                              }`}
+                                }`}
                             >
                               {outbound.status}
                             </span>

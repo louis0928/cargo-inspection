@@ -4,9 +4,12 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "../assets/eastland_logo.png";
+import useAuth from "@/hooks/useAuth";
+import useLogout from "@/hooks/useLogout";
+import { useNavigate } from "react-router-dom";
+
 
 const navItems = [
-  { name: "Home", href: "/" },
   { name: "Outbound", href: "/outbound" },
   { name: "Dashboard", href: "/dashboard" },
   { name: "Verification", href: "/verification" },
@@ -14,8 +17,17 @@ const navItems = [
   { name: "Profile", href: "/profile" },
 ];
 
+
 export function ModernNavbar() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { auth } = useAuth();
+  const logout = useLogout();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,9 +39,8 @@ export function ModernNavbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white shadow-md py-2" : "bg-transparent py-4"
+        }`}
     >
       {/* container mx-auto px-4 */}
       {/* relative w-full px-4 */}
@@ -57,10 +68,11 @@ export function ModernNavbar() {
             </div>
           </div>
 
-          {/* Right - Login Button */}
+          {/* Right - Logout Button */}
           <div className="hidden lg:block">
-            <Button>Login</Button>
+            <Button onClick={handleLogout}>Logout</Button>
           </div>
+
 
           {/* Mobile Menu */}
           <div className="lg:hidden flex-shrink-0 z-10">
@@ -82,7 +94,7 @@ export function ModernNavbar() {
                       {item.name}
                     </a>
                   ))}
-                  <Button className="mt-4">Login</Button>
+                  <Button className="mt-4">Logout</Button>
                 </div>
               </SheetContent>
             </Sheet>

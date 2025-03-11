@@ -9,7 +9,7 @@ const useLogout = () => {
     setAuth({});
     try {
       const response = await axios.delete(
-        "https://integration.eastlandfood.com/efc/v1/auth/logout",
+        "https://integration.eastlandfood.com/eastland-users/auth/logout",
         {
           withCredentials: true,
         }

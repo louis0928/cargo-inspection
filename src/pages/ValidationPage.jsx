@@ -33,10 +33,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignaturePadComponent } from "../components/SignaturePad";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
+import useAuth from "@/hooks/useAuth";
 
 export default function ValidationPage() {
   const navigate = useNavigate();
-
+  const { auth } = useAuth();
   // Local state for filter dropdowns (URL remains unchanged)
   const [selectedYear, setSelectedYear] = useState(
     new Date().getFullYear().toString()
@@ -74,7 +75,14 @@ export default function ValidationPage() {
     const fetchYears = async () => {
       try {
         const response = await axios.get(
-          "https://integration.eastlandfood.com/efc/cargo-inspection/validationDropdown"
+          "https://integration.eastlandfood.com/efc/cargo-inspection/validationDropdown",
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         const availableYears = [
           ...new Set(response.data.map((item) => item.year.toString())),
@@ -92,7 +100,14 @@ export default function ValidationPage() {
     const fetchValidationData = async () => {
       try {
         const response = await axios.get(
-          `https://integration.eastlandfood.com/efc/cargo-inspection/validation/${selectedYear}/${selectedSite}`
+          `https://integration.eastlandfood.com/efc/cargo-inspection/validation/${selectedYear}/${selectedSite}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         setValidationData(response.data[0]);
         setSignature(response.data[0].signature);
@@ -109,7 +124,14 @@ export default function ValidationPage() {
       setLoading(true);
       try {
         const response = await axios.get(
-          `https://integration.eastlandfood.com/efc/cargo-inspection/verifications/${selectedYear}/${selectedSite}`
+          `https://integration.eastlandfood.com/efc/cargo-inspection/verifications/${selectedYear}/${selectedSite}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
         setVerificationData(response.data);
         if (response.data && response.data.length > 0) {
@@ -148,7 +170,13 @@ export default function ValidationPage() {
       await axios.patch(
         "https://integration.eastlandfood.com/efc/cargo-inspection/validation",
         validationDataPayload,
-        { headers: { "Content-Type": "application/json" } }
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       alert("Validation successful!");
     } catch (error) {
@@ -174,7 +202,14 @@ export default function ValidationPage() {
     try {
       await axios.post(
         "https://integration.eastlandfood.com/efc/cargo-inspection/pdfValidation",
-        pdfData
+        pdfData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
     } catch (error) {
       console.error("Error printing pdf:", error);
@@ -279,8 +314,7 @@ export default function ValidationPage() {
                           className="cursor-pointer hover:bg-gray-100"
                           onClick={() =>
                             navigate(
-                              `/validation/${data.name.substring(0, 4)}/${
-                                data.site
+                              `/validation/${data.name.substring(0, 4)}/${data.site
                               }`
                             )
                           }
@@ -294,9 +328,9 @@ export default function ValidationPage() {
                           <TableCell className="px-4 py-2 whitespace-nowrap text-center">
                             {data.verification_date
                               ? format(
-                                  new Date(data.verification_date),
-                                  "yyyy-MM-dd"
-                                )
+                                new Date(data.verification_date),
+                                "yyyy-MM-dd"
+                              )
                               : ""}
                           </TableCell>
                           <TableCell className="px-4 py-2 whitespace-nowrap text-center">
@@ -331,9 +365,9 @@ export default function ValidationPage() {
                   value={
                     validationData?.validation_date
                       ? format(
-                          new Date(validationData.validation_date),
-                          "yyyy-MM-dd"
-                        )
+                        new Date(validationData.validation_date),
+                        "yyyy-MM-dd"
+                      )
                       : format(new Date(), "yyyy-MM-dd")
                   }
                   readOnly

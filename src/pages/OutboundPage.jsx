@@ -4,10 +4,12 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { unionSchema } from "@/validationSchemas/outboundSchema";
+import useAuth from "@/hooks/useAuth";
 
 // UI components (assumed to be pre‑built)
 import { Button } from "@/components/ui/button";
@@ -48,6 +50,8 @@ export function OutboundLoadingSummaryForm() {
   const [loaders, setLoaders] = useState([]);
   const [inspectors, setInspectors] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { auth } = useAuth();
+  const navigate = useNavigate();
   const {
     register,
     control,
@@ -218,7 +222,14 @@ export function OutboundLoadingSummaryForm() {
       };
 
       const response = await axios.get(
-        `https://integration.eastlandfood.com/efc/cargo-inspection/outbound/${data.routeNumber}`
+        `https://integration.eastlandfood.com/efc/cargo-inspection/outbound/${data.routeNumber}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
 
       const existingOutbound = response.data;
@@ -229,7 +240,10 @@ export function OutboundLoadingSummaryForm() {
           `https://integration.eastlandfood.com/efc/cargo-inspection/outbound`,
           payload,
           {
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
             withCredentials: true,
           }
         );
@@ -241,7 +255,10 @@ export function OutboundLoadingSummaryForm() {
           "https://integration.eastlandfood.com/efc/cargo-inspection/outbound",
           payload,
           {
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
             withCredentials: true,
           }
         );
@@ -253,6 +270,7 @@ export function OutboundLoadingSummaryForm() {
       alert("Error processing outbound data.");
     } finally {
       setIsLoading(false);
+      navigate("/dashboard")
     }
   };
 
@@ -345,7 +363,14 @@ export function OutboundLoadingSummaryForm() {
     const getRouteInfo = async () => {
       try {
         const response = await axios.get(
-          `https://integration.eastlandfood.com/efc/cargo-inspection/routeInfo/${routeNumber}`
+          `https://integration.eastlandfood.com/efc/cargo-inspection/routeInfo/${routeNumber}`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${auth.accessToken}`,
+            },
+            withCredentials: true,
+          }
         );
 
         if (!response.data) return;
@@ -393,16 +418,44 @@ export function OutboundLoadingSummaryForm() {
         const [checkerRes, mergerRes, loaderRes, inspectorRes] =
           await Promise.all([
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/checker/${siteData}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/checker/${siteData}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/merger/${siteData}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/merger/${siteData}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/loader/${siteData}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/loader/${siteData}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/inspector/${siteData}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/inspector/${siteData}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
           ]);
         setCheckers(checkerRes.data || []);
@@ -442,16 +495,44 @@ export function OutboundLoadingSummaryForm() {
         const [checkerRes, mergerRes, loaderRes, inspectorRes] =
           await Promise.all([
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/checker/${siteForDropdown}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/checker/${siteForDropdown}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/merger/${siteForDropdown}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/merger/${siteForDropdown}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/loader/${siteForDropdown}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/loader/${siteForDropdown}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
             axios.get(
-              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/inspector/${siteForDropdown}`
+              `https://integration.eastlandfood.com/efc/cargo-inspection/user_dropdown/inspector/${siteForDropdown}`,
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${auth.accessToken}`,
+                },
+                withCredentials: true,
+              }
             ),
           ]);
         setCheckers(checkerRes.data || []);
@@ -461,7 +542,13 @@ export function OutboundLoadingSummaryForm() {
 
         // Now fetch the outbound data.
         const response = await axios.get(
-          `https://integration.eastlandfood.com/efc/cargo-inspection/outbound/${routeNum}`
+          `https://integration.eastlandfood.com/efc/cargo-inspection/outbound/${routeNum}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
         );
         if (!response.data) return;
         const data = response.data;
@@ -496,81 +583,81 @@ export function OutboundLoadingSummaryForm() {
             : "",
           ...(data.powered_plt_jack_inspection
             ? JSON.parse(data.powered_plt_jack_inspection).checklist.reduce(
-                (acc, item, index) => ({
-                  ...acc,
-                  [`pallet-check-${index}`]: item || "",
-                }),
-                {}
-              )
+              (acc, item, index) => ({
+                ...acc,
+                [`pallet-check-${index}`]: item || "",
+              }),
+              {}
+            )
             : {}),
           ...(data.load_info
             ? {
-                checkerName: JSON.parse(data.load_info).checkerName || "",
-                mergerName: JSON.parse(data.load_info).mergerName || "",
-                loaderName: JSON.parse(data.load_info).loaderName || "",
-                inspectorName: JSON.parse(data.load_info).inspectorName || "",
-                inspectionDateTime:
-                  JSON.parse(data.load_info).inspectionDateTime || "",
-                loadingDockNo: JSON.parse(data.load_info).loadingDockNo || "",
-                refrigeratorThermostat:
-                  JSON.parse(data.load_info).refrigeratorThermostat || "",
-                refrigeratorUnitTemperature:
-                  JSON.parse(data.load_info).refrigeratorUnitTemperature || "",
-                reeferTurningOnTime:
-                  JSON.parse(data.load_info).reeferTurningOnTime || "",
-                reeferTurningOnTemperature:
-                  JSON.parse(data.load_info).reeferTurningOnTemperature || "",
-                reeferAfterLoadingTemperature:
-                  JSON.parse(data.load_info).reeferAfterLoadingTemperature ||
-                  "",
-                startLoadingTime:
-                  JSON.parse(data.load_info).startLoadingTime || "",
-                finishedLoadingTime:
-                  JSON.parse(data.load_info).finishedLoadingTime || "",
-              }
+              checkerName: JSON.parse(data.load_info).checkerName || "",
+              mergerName: JSON.parse(data.load_info).mergerName || "",
+              loaderName: JSON.parse(data.load_info).loaderName || "",
+              inspectorName: JSON.parse(data.load_info).inspectorName || "",
+              inspectionDateTime:
+                JSON.parse(data.load_info).inspectionDateTime || "",
+              loadingDockNo: JSON.parse(data.load_info).loadingDockNo || "",
+              refrigeratorThermostat:
+                JSON.parse(data.load_info).refrigeratorThermostat || "",
+              refrigeratorUnitTemperature:
+                JSON.parse(data.load_info).refrigeratorUnitTemperature || "",
+              reeferTurningOnTime:
+                JSON.parse(data.load_info).reeferTurningOnTime || "",
+              reeferTurningOnTemperature:
+                JSON.parse(data.load_info).reeferTurningOnTemperature || "",
+              reeferAfterLoadingTemperature:
+                JSON.parse(data.load_info).reeferAfterLoadingTemperature ||
+                "",
+              startLoadingTime:
+                JSON.parse(data.load_info).startLoadingTime || "",
+              finishedLoadingTime:
+                JSON.parse(data.load_info).finishedLoadingTime || "",
+            }
             : {}),
           trailerInspectionComment: data.trailer_inspection
             ? JSON.parse(data.trailer_inspection).comment || ""
             : "",
           ...(data.trailer_inspection
             ? JSON.parse(data.trailer_inspection).checklist.reduce(
-                (acc, area, areaIndex) =>
-                  area.items.reduce(
-                    (itemAcc, item, itemIndex) => ({
-                      ...itemAcc,
-                      [`trailer-check-${areaIndex}-${itemIndex}`]:
-                        item.value || "",
-                    }),
-                    acc
-                  ),
-                {}
-              )
+              (acc, area, areaIndex) =>
+                area.items.reduce(
+                  (itemAcc, item, itemIndex) => ({
+                    ...itemAcc,
+                    [`trailer-check-${areaIndex}-${itemIndex}`]:
+                      item.value || "",
+                  }),
+                  acc
+                ),
+              {}
+            )
             : {}),
           ...(data.loading_summary
             ? {
-                dateRecord: JSON.parse(data.loading_summary).dateRecord || "",
-                totalWeight: JSON.parse(data.loading_summary).totalWeight || "",
-                totalPallet: JSON.parse(data.loading_summary).totalPallet || "",
-                iceCream: JSON.parse(data.loading_summary).iceCream || "",
-                foilCount: JSON.parse(data.loading_summary).foilCount || "",
-                ...JSON.parse(data.loading_summary).positions.reduce(
-                  (acc, pos, index) => ({
-                    ...acc,
-                    [`position${index + 1}`]: pos.weight || "",
-                    [`stop${index + 1}`]: pos.stop || "",
-                  }),
-                  {}
-                ),
-              }
+              dateRecord: JSON.parse(data.loading_summary).dateRecord || "",
+              totalWeight: JSON.parse(data.loading_summary).totalWeight || "",
+              totalPallet: JSON.parse(data.loading_summary).totalPallet || "",
+              iceCream: JSON.parse(data.loading_summary).iceCream || "",
+              foilCount: JSON.parse(data.loading_summary).foilCount || "",
+              ...JSON.parse(data.loading_summary).positions.reduce(
+                (acc, pos, index) => ({
+                  ...acc,
+                  [`position${index + 1}`]: pos.weight || "",
+                  [`stop${index + 1}`]: pos.stop || "",
+                }),
+                {}
+              ),
+            }
             : {}),
           ...(data.loading_return
             ? {
-                returnDateTime:
-                  JSON.parse(data.loading_return).returnDateTime || "",
-                returnLB: JSON.parse(data.loading_return).returnLB || "",
-                returnPW: JSON.parse(data.loading_return).returnPW || "",
-                returnHT: JSON.parse(data.loading_return).returnHT || "",
-              }
+              returnDateTime:
+                JSON.parse(data.loading_return).returnDateTime || "",
+              returnLB: JSON.parse(data.loading_return).returnLB || "",
+              returnPW: JSON.parse(data.loading_return).returnPW || "",
+              returnHT: JSON.parse(data.loading_return).returnHT || "",
+            }
             : {}),
         };
 
@@ -726,13 +813,21 @@ export function OutboundLoadingSummaryForm() {
                     setIsLoading(true);
                     const response = await axios.post(
                       `https://integration.eastlandfood.com/efc/cargo-inspection/pdfOutbound`,
-                      pdfData
+                      pdfData,
+                      {
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${auth.accessToken}`,
+                        },
+                        withCredentials: true,
+                      }
                     );
-                    alert("Pdf has been sent to email");
+                    alert("Pdf has been sent to google drive");
                   } catch (error) {
                     console.error("Couldn't print outbound pdf: ", error);
                   } finally {
                     setIsLoading(false);
+
                   }
                 }}
               >
@@ -788,6 +883,24 @@ function LogisticsInformation({ register, control, errors }) {
           )}
         </div>
         <div>
+          <Label htmlFor="routeNumber" className="mb-2 block text-left">
+            Route Number
+          </Label>
+          <Input id="routeNumber" {...register("routeNumber")} />
+          {errors.routeNumber && (
+            <p className="text-red-500">{errors.routeNumber.message}</p>
+          )}
+        </div>
+        <div>
+          <Label htmlFor="routeName" className="mb-2 block text-left">
+            Route Name
+          </Label>
+          <Input id="routeName" {...register("routeName")} />
+          {errors.routeName && (
+            <p className="text-red-500">{errors.routeName.message}</p>
+          )}
+        </div>
+        <div>
           <Label htmlFor="site" className="mb-2 block text-left" id="site">
             Site
           </Label>
@@ -809,24 +922,7 @@ function LogisticsInformation({ register, control, errors }) {
           />
           {errors.site && <p className="text-red-500">{errors.site.message}</p>}
         </div>
-        <div>
-          <Label htmlFor="routeNumber" className="mb-2 block text-left">
-            Route Number
-          </Label>
-          <Input id="routeNumber" {...register("routeNumber")} />
-          {errors.routeNumber && (
-            <p className="text-red-500">{errors.routeNumber.message}</p>
-          )}
-        </div>
-        <div>
-          <Label htmlFor="routeName" className="mb-2 block text-left">
-            Route Name
-          </Label>
-          <Input id="routeName" {...register("routeName")} />
-          {errors.routeName && (
-            <p className="text-red-500">{errors.routeName.message}</p>
-          )}
-        </div>
+
         <div>
           <Label htmlFor="deliveryDate" className="mb-2 block text-left">
             Delivery Date

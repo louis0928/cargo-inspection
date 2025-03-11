@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Check, Pencil, User, Users } from "lucide-react";
+import { Check, Pencil, User, Users, Trash } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import useAuth from "@/hooks/useAuth";
 
 export function ProfilePage() {
   const [site, setSite] = useState("MD");
@@ -42,6 +43,9 @@ export function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [deleteUser, setDeleteUser] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const { auth } = useAuth();
 
   // Fetch profiles when site changes
   useEffect(() => {
@@ -52,7 +56,14 @@ export function ProfilePage() {
     setIsLoading(true);
     try {
       const res = await axios.get(
-        `https://integration.eastlandfood.com/efc/cargo-inspection/profiles/${site}`
+        `https://integration.eastlandfood.com/efc/cargo-inspection/profiles/${site}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       setProfiles(res.data);
     } catch (err) {
@@ -72,7 +83,14 @@ export function ProfilePage() {
     try {
       await axios.patch(
         `https://integration.eastlandfood.com/efc/cargo-inspection/profile`,
-        updatedUser
+        updatedUser,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       await fetchProfiles();
     } catch (err) {
@@ -89,7 +107,14 @@ export function ProfilePage() {
       // Assuming POST to the profiles endpoint for the given site
       await axios.post(
         `https://integration.eastlandfood.com/efc/cargo-inspection/profile`,
-        newUser
+        newUser,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
       );
       await fetchProfiles();
     } catch (err) {
@@ -99,6 +124,80 @@ export function ProfilePage() {
       setIsCreateModalOpen(false);
     }
   };
+
+  const handleDeleteClick = (user) => {
+    setDeleteUser(user);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async (userId) => {
+    setIsLoading(true);
+    try {
+      await axios.delete(
+        `https://integration.eastlandfood.com/efc/cargo-inspection/profile/${userId}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.accessToken}`,
+          },
+          withCredentials: true,
+        }
+      );
+      await fetchProfiles();
+    } catch (err) {
+      console.error("Error deleting user", err);
+    } finally {
+      setIsLoading(false);
+      setIsDeleteModalOpen(false);
+    }
+  };
+
+  function DeleteUserModal({ user, open, onClose, onConfirm }) {
+    // If there's no user selected, don't render the modal at all
+    if (!user) return null;
+
+    return (
+      <Dialog open={open} onOpenChange={onClose}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Delete User Profile</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this profile? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Display user information */}
+          <div className="space-y-2 mt-2">
+            <p>
+              <strong>Name:</strong> {user.name}
+            </p>
+            <p>
+              <strong>Loader:</strong> {user.isLoader === 1 ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Merger:</strong> {user.isMerger === 1 ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Checker:</strong> {user.isChecker === 1 ? "Yes" : "No"}
+            </p>
+            <p>
+              <strong>Inspector:</strong> {user.isInspector === 1 ? "Yes" : "No"}
+            </p>
+          </div>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            {/* Call onConfirm with user.user_id when the user confirms */}
+            <Button variant="destructive" onClick={() => onConfirm(user.user_id)}>
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 mt-10">
@@ -145,7 +244,7 @@ export function ProfilePage() {
                   <TableHead className="text-center">Merger</TableHead>
                   <TableHead className="text-center">Checker</TableHead>
                   <TableHead className="text-center">Inspector</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -228,18 +327,31 @@ export function ProfilePage() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell className="p-2 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditClick(user);
-                          }}
-                        >
-                          <Pencil className="h-3.5 w-3.5 mr-1" />
-                          Edit
-                        </Button>
+                      <TableCell className="p-2 text-center">
+                        <div className="grid grid-cols-2 gap-2 w-full">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditClick(user);
+                            }}
+                          >
+                            <Pencil className="h-3.5 w-3.5 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClick(user);
+                            }}
+                          >
+                            <Trash className="h-3.5 w-3.5 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -266,6 +378,13 @@ export function ProfilePage() {
         onClose={() => setIsCreateModalOpen(false)}
         onSave={handleCreateSave}
         site={site}
+      />
+
+      <DeleteUserModal
+        user={deleteUser}
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
       />
 
       {/* Loading Overlay */}
