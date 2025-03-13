@@ -112,7 +112,8 @@ export default function DashboardPage() {
         (item) =>
           item.route_number.toLowerCase().includes(term) ||
           item.route_name.toLowerCase().includes(term) ||
-          item.driver.toLowerCase().includes(term)
+          item.driver.toLowerCase().includes(term) ||
+          item.site.toLowerCase().includes(term)
       );
     }
 
@@ -376,7 +377,7 @@ export default function DashboardPage() {
                 <div className="relative w-full md:w-64">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search routes, drivers..."
+                    placeholder="Search routes, site..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-9"

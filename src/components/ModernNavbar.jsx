@@ -48,7 +48,7 @@ export function ModernNavbar() {
         <div className="flex items-center justify-between h-16 relative">
           {/* Left - Logo */}
           <div className="flex-shrink-0 z-10">
-            <a href="/" className="flex items-center">
+            <a href="/dashboard" className="flex items-center">
               <img src={logo} alt="nav-img" className="h-12 w-auto" />
             </a>
           </div>
@@ -69,9 +69,12 @@ export function ModernNavbar() {
           </div>
 
           {/* Right - Logout Button */}
-          <div className="hidden lg:block">
+          {!auth?.accessToken ? <div className="hidden lg:block">
+            <Button onClick={() => navigate("/login")}>Login</Button>
+          </div> : <div className="hidden lg:block">
             <Button onClick={handleLogout}>Logout</Button>
-          </div>
+          </div>}
+
 
 
           {/* Mobile Menu */}

@@ -314,8 +314,7 @@ export default function ValidationPage() {
                           className="cursor-pointer hover:bg-gray-100"
                           onClick={() =>
                             navigate(
-                              `/validation/${data.name.substring(0, 4)}/${data.site
-                              }`
+                              `/verification/${data.name.substring(0, 4)}/${data.name.substring(4)}/${data.site}`
                             )
                           }
                         >
