@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,15 +34,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SignaturePadComponent } from "../components/SignaturePad";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 import useAuth from "@/hooks/useAuth";
+import { jwtDecode } from "jwt-decode";
 
 export default function ValidationPage() {
   const navigate = useNavigate();
   const { auth } = useAuth();
+  const { validationYear, validationSite } = useParams();
   // Local state for filter dropdowns (URL remains unchanged)
   const [selectedYear, setSelectedYear] = useState(
-    new Date().getFullYear().toString()
+    validationYear || new Date().getFullYear().toString()
   );
-  const [selectedSite, setSelectedSite] = useState("MD");
+  const [selectedSite, setSelectedSite] = useState(validationSite || "MD");
 
   // State for API data
   const [verificationData, setVerificationData] = useState([]);
@@ -53,6 +55,7 @@ export default function ValidationPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+
 
   const siteArr = ["MD", "SC", "IL"];
 
@@ -151,22 +154,49 @@ export default function ValidationPage() {
     fetchVerificationData();
   }, [selectedYear, selectedSite]);
 
+  // Whenever a dropdown changes, update the URL (the URL becomes the source of truth)
+  useEffect(() => {
+    navigate(`/validation/${selectedYear}/${selectedSite}`, {
+      replace: true,
+    });
+  }, [selectedYear, selectedSite, navigate]);
+
   // Function to send a PATCH request to update the validation record.
-  const handleVerify = async () => {
+  const handleValidation = async () => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+
+    const selectedYearNum = parseInt(selectedYear, 10);
+
     if (!signature) {
-      alert("Please sign before verifying outbound!");
+      alert("Please sign before validating outbound!");
       return;
     }
-    setIsSubmitting(true);
+
+    if (selectedYearNum >= currentYear) {
+      setModalMessage("Validation can only be done for years that have passed.");
+      setOpenModal(true);
+      return;
+    }
+
+    const verificationNotAllCompleted = verificationData.some((verification) => verification.verification_status === 1);
+
+    if (verificationNotAllCompleted) {
+      setModalMessage("All verifications need to be completed!");
+      setOpenModal(true);
+      return;
+    }
+
     const validationDataPayload = {
       validationDate: format(new Date(), "yyyy-MM-dd"),
-      validatedBy: "Louis",
+      validatedBy: jwtDecode(auth?.accessToken)?.username,
       signature,
       year: selectedYear,
       site: selectedSite,
       validationStatus: 0,
     };
     try {
+      setIsSubmitting(true);
       await axios.patch(
         "https://integration.eastlandfood.com/efc/cargo-inspection/validation",
         validationDataPayload,
@@ -178,10 +208,12 @@ export default function ValidationPage() {
           withCredentials: true,
         }
       );
-      alert("Validation successful!");
+      alert("Validation successful! Generating PDF...");
+
+      await handlePrint();
     } catch (error) {
-      console.error("Error verifying outbound:", error);
-      alert("Failed to verify. Please try again.");
+      console.error("Error validating outbound:", error);
+      alert("Failed to validate. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -193,8 +225,8 @@ export default function ValidationPage() {
     const pdfData = {
       year: selectedYear,
       data: verificationData,
-      email: "louis@eastlandfood.com",
-      validatedBy: "Louis",
+      email: jwtDecode(auth?.accessToken)?.email,
+      validatedBy: jwtDecode(auth?.accessToken)?.username,
       validationDate: format(new Date(), "yyyy-MM-dd"),
       signature: signature,
       site: selectedSite,
@@ -389,16 +421,29 @@ export default function ValidationPage() {
 
             {/* Action Buttons */}
             <div className="flex justify-end gap-2">
-              <Button onClick={handleVerify} className="bg-blue-600 text-white">
-                Verify Outbound
+              <Button onClick={handleValidation} className="bg-blue-600 text-white">
+                Validate Outbound
               </Button>
-              <Button onClick={handlePrint} className="bg-gray-900 text-white">
+              {/* <Button onClick={handlePrint} className="bg-gray-900 text-white">
                 Print Validation
-              </Button>
+              </Button> */}
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Modal for validation issues */}
+      <Dialog open={openModal} onOpenChange={setOpenModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Validation Error</DialogTitle>
+          </DialogHeader>
+          <p className="py-4">{modalMessage}</p>
+          <DialogFooter>
+            <Button onClick={() => setOpenModal(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

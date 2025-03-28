@@ -13,7 +13,7 @@ export default function LoginPage() {
   const { setAuth } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from?.pathname || "/dashboard";
+  const from = location.state?.from?.pathname || "/";
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [errMsg, setErrMsg] = useState("");
 
@@ -82,8 +82,8 @@ export default function LoginPage() {
           </h1>
         </CardHeader>
         <CardContent>
-        <div className="flex justify-center mb-4">
-          <GoogleLogin onSuccess={handleGoogle} onError={handleError} />
+          <div className="flex justify-center mb-4">
+            <GoogleLogin onSuccess={handleGoogle} onError={handleError} />
           </div>
           <p className="mt-4 text-center text-sm text-gray-500">
             By signing in, you agree to our Terms of Service and Privacy Policy

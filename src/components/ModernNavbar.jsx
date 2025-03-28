@@ -10,11 +10,11 @@ import { useNavigate } from "react-router-dom";
 
 
 const navItems = [
-  { name: "Outbound", href: "/outbound" },
+  { name: "Home", href: "/" },
   { name: "Dashboard", href: "/dashboard" },
-  { name: "Verification", href: "/verification" },
-  { name: "Validation", href: "/validation" },
-  { name: "Profile", href: "/profile" },
+  { name: "Verification", href: "/verification", roles: ["ADMIN"] },
+  { name: "Validation", href: "/validation", roles: ["ADMIN"] },
+  { name: "Profile", href: "/profile", roles: ["ADMIN"] },
 ];
 
 
@@ -28,6 +28,12 @@ export function ModernNavbar() {
     await logout();
     navigate("/login");
   };
+
+  const userRoles = auth?.roles || []; // Defaults to empty array
+  const isAdmin = userRoles.includes("ADMIN"); // Check if user has ADMIN role
+  const filteredNavItems = navItems.filter(
+    (item) => !item.roles || item.roles.some((role) => userRoles.includes(role))
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,7 +54,7 @@ export function ModernNavbar() {
         <div className="flex items-center justify-between h-16 relative">
           {/* Left - Logo */}
           <div className="flex-shrink-0 z-10">
-            <a href="/dashboard" className="flex items-center">
+            <a href="/" className="flex items-center">
               <img src={logo} alt="nav-img" className="h-12 w-auto" />
             </a>
           </div>
@@ -56,7 +62,7 @@ export function ModernNavbar() {
           {/* Center - Navigation Items */}
           <div className="hidden lg:flex absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
             <div className="flex space-x-8">
-              {navItems.map((item) => (
+              {filteredNavItems.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
@@ -88,7 +94,7 @@ export function ModernNavbar() {
               </SheetTrigger>
               <SheetContent side="right">
                 <div className="flex flex-col space-y-4 mt-4">
-                  {navItems.map((item) => (
+                  {filteredNavItems.map((item) => (
                     <a
                       key={item.name}
                       href={item.href}

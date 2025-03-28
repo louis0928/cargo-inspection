@@ -9,6 +9,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LoadingOverlay } from "@/components/LoadingOverlay";
 import {
   Table,
   TableBody,
@@ -44,6 +45,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { jwtDecode } from "jwt-decode";
 
 export default function VerificationPage() {
   const navigate = useNavigate();
@@ -68,6 +70,7 @@ export default function VerificationPage() {
   // States for modal handling
   const [openModal, setOpenModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const siteArr = ["MD", "SC", "IL"];
   const { auth } = useAuth();
 
@@ -182,13 +185,13 @@ export default function VerificationPage() {
   const handlePrint = async () => {
     const name = selectedYear + selectedMonth;
     const data = outbounds;
-    const email = "louis@eastlandfood.com";
+    const email = jwtDecode(auth?.accessToken)?.email;
 
     const pdfData = {
       name: name,
       data: data,
       email: email,
-      verifiedBy: "Louis",
+      verifiedBy: jwtDecode(auth?.accessToken)?.username,
       signature: signature,
       site: selectedSite,
     };
@@ -212,8 +215,24 @@ export default function VerificationPage() {
   };
 
   const handleVerify = async () => {
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear();
+    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-based
+
+    const selectedYearNum = parseInt(selectedYear, 10);
+    const selectedMonthNum = parseInt(selectedMonth, 10);
+
     if (!signature) {
       setModalMessage("Please sign before verifying outbound!");
+      setOpenModal(true);
+      return;
+    }
+
+    if (
+      selectedYearNum > currentYear ||
+      (selectedYearNum === currentYear && selectedMonthNum >= currentMonth)
+    ) {
+      setModalMessage("Verification can only be done for months that have passed.");
       setOpenModal(true);
       return;
     }
@@ -238,15 +257,15 @@ export default function VerificationPage() {
       setOpenModal(true);
       return;
     }
-
     const verificationDataPayload = {
       verificationDate: format(new Date(), "yyyy-MM-dd"),
-      verifiedBy: "Louis",
+      verifiedBy: jwtDecode(auth?.accessToken)?.username,
       signature,
       name: selectedYear + selectedMonth,
       site: selectedSite,
     };
     try {
+      setIsSubmitting(true);
       await axios.patch(
         "https://integration.eastlandfood.com/efc/cargo-inspection/verification",
         verificationDataPayload,
@@ -258,15 +277,20 @@ export default function VerificationPage() {
           withCredentials: true,
         }
       );
-      alert("Verification successful!");
+      alert("Verification successful! Generating PDF...");
+
+      await handlePrint();
     } catch (error) {
       console.error("Error verifying outbounds:", error);
       alert("Failed to verify. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gray-50 mt-10">
+      {isSubmitting && <LoadingOverlay message="Processing Verification..." />}
       <div className="container mx-auto py-6 px-4">
         <Card>
           <CardHeader>
@@ -527,9 +551,9 @@ export default function VerificationPage() {
               <Button onClick={handleVerify} className="bg-blue-600 text-white">
                 Verify Outbound
               </Button>
-              <Button onClick={handlePrint} className="bg-gray-900 text-white">
+              {/* <Button onClick={handlePrint} className="bg-gray-900 text-white">
                 Print Verification
-              </Button>
+              </Button> */}
             </div>
             <div className="flex justify-end pt-4"></div>
           </CardContent>

@@ -10,6 +10,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { unionSchema } from "@/validationSchemas/outboundSchema";
 import useAuth from "@/hooks/useAuth";
+import { jwtDecode } from "jwt-decode";
 
 // UI components (assumed to be pre‑built)
 import { Button } from "@/components/ui/button";
@@ -71,6 +72,12 @@ export function OutboundLoadingSummaryForm() {
   });
 
   const routeNumber = watch("routeNumber");
+  const handTruckNoValue = watch("handTruckNo");
+  const returnHTValue = watch("returnHT");
+  const poweredPalletJackNoValue = watch("poweredPalletJackNo");
+  const returnPWValue = watch("returnPW");
+  const loadBarCountValue = watch("loadBarCount");
+  const returnLBValue = watch("returnLB");
 
   const onSubmit = async (data) => {
     // Reassemble the flat data into your nested JSON structure.
@@ -78,8 +85,8 @@ export function OutboundLoadingSummaryForm() {
     try {
       const payload = {
         outboundStatus: data.outboundStatus,
-        lastModifiedBy: "Louis",
-        email: "lightjan2005@gmail.com",
+        lastModifiedBy: jwtDecode(auth?.accessToken)?.username,
+        email: jwtDecode(auth?.accessToken)?.email,
         carrier: data.carrier,
         site: data.site,
         routeNumber: data.routeNumber,
@@ -265,6 +272,29 @@ export function OutboundLoadingSummaryForm() {
 
         alert("Successfully created a new outbound record.");
       }
+
+      if (data.outboundStatus === 0) {
+        try {
+          const pdfResponse = await axios.post(
+            `https://integration.eastlandfood.com/efc/cargo-inspection/pdfOutbound`,
+            {
+              ...data,
+              email: jwtDecode(auth?.accessToken)?.email,
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${auth.accessToken}`,
+              },
+              withCredentials: true,
+            }
+          );
+          alert("PDF has been sent to google drive.");
+        } catch (pdfError) {
+          console.error("Couldn't send outbound PDF: ", pdfError);
+          alert("Failed to send outbound PDF.");
+        }
+      }
     } catch (error) {
       console.error("Error processing outbound data:", error);
       alert("Error processing outbound data.");
@@ -318,8 +348,20 @@ export function OutboundLoadingSummaryForm() {
 
     // ✅ Check if any trailer inspection checklist has a "no" value
     const hasTrailerIssue = watchTrailerChecklist.includes("no");
-    setRequireAttention(hasPalletJackProblem || hasTrailerIssue);
-  }, [watchPalletJackChecklist, watchTrailerChecklist]);
+    const returnValuesNotMatch = handTruckNoValue !== returnHTValue ||
+      poweredPalletJackNoValue !== returnPWValue ||
+      loadBarCountValue !== returnLBValue;
+
+    setRequireAttention(hasPalletJackProblem || hasTrailerIssue || returnValuesNotMatch);
+  }, [
+    watchPalletJackChecklist,
+    watchTrailerChecklist,
+    handTruckNoValue,
+    returnHTValue,
+    poweredPalletJackNoValue,
+    returnPWValue,
+    loadBarCountValue,
+    returnLBValue,]);
 
   useEffect(() => {
     const [refrigeratorUnitTemperature] = watchLoadInformation;
@@ -385,6 +427,7 @@ export function OutboundLoadingSummaryForm() {
             : "", // Delivery Date formatted as YYYY-MM-DD
           driver: data.Name || "", // Driver Name
           helper: data["Name:2"] || "", // Helper Name
+          totalWeight: data.TotalWeight || "",
         };
 
         reset((prev) => ({
@@ -673,6 +716,12 @@ export function OutboundLoadingSummaryForm() {
     getData();
   }, [routeNum, reset, siteData]);
 
+  useEffect(() => {
+    if (routeNum) {
+      setValue("routeNumber", routeNum);
+    }
+  }, [routeNum, setValue]);
+
   return (
     <div className="min-h-screen bg-[#f9fafb] py-8 mt-[3rem]">
       {isLoading && <LoadingOverlay message="Saving pdf to Google drive" />}
@@ -799,7 +848,7 @@ export function OutboundLoadingSummaryForm() {
             >
               Submit
             </Button>
-            {formStatus === 0 || formStatus === 2 ? (
+            {/* {formStatus === 0 || formStatus === 2 ? (
               <Button
                 type="button"
                 variant="outline"
@@ -807,7 +856,7 @@ export function OutboundLoadingSummaryForm() {
                   const formData = getValues();
                   const pdfData = {
                     ...formData,
-                    email: "louis@eastlandfood.com",
+                    email: jwtDecode(auth?.accessToken)?.email,
                   };
                   try {
                     setIsLoading(true);
@@ -835,7 +884,7 @@ export function OutboundLoadingSummaryForm() {
               </Button>
             ) : (
               <></>
-            )}
+            )} */}
           </div>
         </div>
       </form>
@@ -1683,7 +1732,7 @@ function LoadingReturn({ register, errors }) {
         </div>
         <div>
           <Label htmlFor="returnLB" className="mb-2 block text-left">
-            LB
+            How many load bars?
           </Label>
           <Input id="returnLB" {...register("returnLB")} />
           {errors.returnLB && (
@@ -1692,7 +1741,7 @@ function LoadingReturn({ register, errors }) {
         </div>
         <div>
           <Label htmlFor="returnPW" className="mb-2 block text-left">
-            PW
+            Powered Pallet Jack No.
           </Label>
           <Input id="returnPW" {...register("returnPW")} />
           {errors.returnPW && (
@@ -1701,7 +1750,7 @@ function LoadingReturn({ register, errors }) {
         </div>
         <div>
           <Label htmlFor="returnHT" className="mb-2 block text-left">
-            H-T
+            Hand Truck No.
           </Label>
           <Input id="returnHT" {...register("returnHT")} />
           {errors.returnHT && (

@@ -13,6 +13,7 @@ import RequireAuth from "./components/utility/RequireAuth";
 import { useLocation } from "react-router-dom";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import PersistLogin from "./components/utility/PersistLogin";
+import HomePage from "./pages/HomePage";
 
 function App() {
   const location = useLocation();
@@ -29,6 +30,7 @@ function App() {
           <Route
             element={<RequireAuth allowedRoles={["ADMIN", "INSPECTOR"]} />}
           >
+            <Route path='/' element={<HomePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route
               path="/outbound/:routeNum"
@@ -39,7 +41,7 @@ function App() {
           <Route element={<RequireAuth allowedRoles={["ADMIN"]} />}>
             <Route path="/validation" element={<ValidationPage />} />
             <Route
-              path="/validation/:selectedYear/:selectedSite"
+              path="/validation/:validationYear/:validationSite"
               element={<ValidationPage />}
             />
             <Route path="/verification" element={<VerificationPage />} />
