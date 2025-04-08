@@ -339,6 +339,8 @@ export function OutboundLoadingSummaryForm() {
   ]);
 
   const watchLoadInformation = watch(["refrigeratorUnitTemperature"]);
+  const watchReeferAfterLoadingTemperature = watch(["reeferAfterLoadingTemperature"])
+
   const siteData = watch("site");
 
   // 🔹 Dynamically update `requireAttention` and `tempExc` when form fields change
@@ -365,11 +367,12 @@ export function OutboundLoadingSummaryForm() {
 
   useEffect(() => {
     const [refrigeratorUnitTemperature] = watchLoadInformation;
+    const [reeferAfterLoadingTemperature] = watchReeferAfterLoadingTemperature;
 
     // ✅ Check if tempExc should be true
-    const exceedsTempLimit = parseFloat(refrigeratorUnitTemperature) > 32;
+    const exceedsTempLimit = parseFloat(refrigeratorUnitTemperature) > 32 || parseFloat(reeferAfterLoadingTemperature) > 32;
     setTempExc(exceedsTempLimit);
-  }, [watchLoadInformation]);
+  }, [watchLoadInformation, watchReeferAfterLoadingTemperature]);
 
   useEffect(() => {
     const [returnDateTime, returnLB, returnPW, returnHT] = watchLoadReturn;
@@ -935,7 +938,7 @@ function LogisticsInformation({ register, control, errors }) {
           <Label htmlFor="routeNumber" className="mb-2 block text-left">
             Route Number
           </Label>
-          <Input id="routeNumber" {...register("routeNumber")} />
+          <Input type="number" id="routeNumber" {...register("routeNumber")} />
           {errors.routeNumber && (
             <p className="text-red-500">{errors.routeNumber.message}</p>
           )}
@@ -985,7 +988,10 @@ function LogisticsInformation({ register, control, errors }) {
           <Label htmlFor="tractorStTruck" className="mb-2 block text-left">
             Tractor/St Truck
           </Label>
-          <Input id="tractorStTruck" {...register("tractorStTruck")} />
+          <Input
+            type="number"
+            id="tractorStTruck"
+            {...register("tractorStTruck")} />
           {errors.tractorStTruck && (
             <p className="text-red-500">{errors.tractorStTruck.message}</p>
           )}
@@ -994,7 +1000,10 @@ function LogisticsInformation({ register, control, errors }) {
           <Label htmlFor="trailer" className="mb-2 block text-left">
             Trailer
           </Label>
-          <Input id="trailer" {...register("trailer")} />
+          <Input
+            type="number"
+            id="trailer"
+            {...register("trailer")} />
           {errors.trailer && (
             <p className="text-red-500">{errors.trailer.message}</p>
           )}
@@ -1045,7 +1054,9 @@ function AssignedLoadEquipment({ register, errors }) {
                 Hand Truck No.
               </TableCell>
               <TableCell>
-                <Input id="handTruckNo" {...register("handTruckNo")} />
+                <Input type="number"
+                  id="handTruckNo"
+                  {...register("handTruckNo")} />
                 {errors.handTruckNo && (
                   <p className="text-red-500">{errors.handTruckNo.message}</p>
                 )}
@@ -1057,6 +1068,7 @@ function AssignedLoadEquipment({ register, errors }) {
               </TableCell>
               <TableCell>
                 <Input
+                  type="number"
                   id="poweredPalletJackNo"
                   {...register("poweredPalletJackNo")}
                 />
@@ -1330,7 +1342,7 @@ function LoadInformation({
           <Label htmlFor="loadingDockNo" className="mb-2 block text-left">
             Loading Dock No#
           </Label>
-          <Input id="loadingDockNo" {...register("loadingDockNo")} />
+          <Input type="number" id="loadingDockNo" {...register("loadingDockNo")} />
           {errors.loadingDockNo && (
             <p className="text-red-500">{errors.loadingDockNo.message}</p>
           )}
@@ -1625,11 +1637,13 @@ function LoadingSummary({ register, control, errors }) {
             <div key={position} className="space-y-2">
               <Label htmlFor={`position${position}`}>Position {position}</Label>
               <Input
+                type="number"
                 id={`position${position}`}
                 placeholder="Weight"
                 {...register(`position${position}`)}
               />
               <Input
+                type="number"
                 id={`stop${position}`}
                 placeholder="Stop"
                 {...register(`stop${position}`)}

@@ -108,11 +108,11 @@ export const draftSchema = z.object({
 export const submitSchema = draftSchema.extend({
   mode: z.literal("waiting"),
   // Assigned Load Equipment
-  handTruckNo: z.string().min(1, "Hand Truck No is required"),
-  poweredPalletJackNo: z.string().min(1, "Powered Pallet Jack No is required"),
+  handTruckNo: z.string().min(0, "Hand Truck No is required"),
+  poweredPalletJackNo: z.string().min(0, "Powered Pallet Jack No is required"),
   loadBarCount: z.preprocess(
     (a) => (a === "" ? undefined : Number(a)),
-    z.number().min(1, "Load Bar Count is required")
+    z.number().min(0, "Load Bar Count is required")
   ),
 
   // Powered Pallet Jack Inspection (mandatory)

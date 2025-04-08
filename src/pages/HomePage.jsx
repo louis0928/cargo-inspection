@@ -527,31 +527,58 @@ export default function HomePage() {
                                         </ResponsiveContainer>
                                     </div>
                                 ) : (
-                                    <div className="h-[350px] overflow-auto">
-                                        <Card>
-                                            <CardContent>
-                                                <Table>
-                                                    <TableHeader>
-                                                        <TableRow>
-                                                            <TableHead>Route Number</TableHead>
-                                                            <TableHead>Route Name</TableHead>
-                                                        </TableRow>
-                                                    </TableHeader>
-                                                    <TableBody>
-                                                        {routesNeedingInspection.map((route) => (
-                                                            <TableRow
-                                                                key={route.DocEntry}
-                                                                className="cursor-pointer hover:bg-gray-50 transition-colors text-left"
-                                                                onClick={() => navigate(`/outbound/${route.DocEntry}`)}
-                                                            >
-                                                                <TableCell className="font-semibold">{route.DocEntry}</TableCell>
-                                                                <TableCell>{route.U_Title}</TableCell>
-                                                            </TableRow>
-                                                        ))}
-                                                    </TableBody>
-                                                </Table>
-                                            </CardContent>
-                                        </Card>
+                                    <div className="h-[350px]">
+                                        {routesNeedingInspection?.length > 0 ? (
+                                            <div className="overflow-auto">
+                                                <Card>
+                                                    <CardContent>
+                                                        <Table>
+                                                            <TableHeader>
+                                                                <TableRow>
+                                                                    <TableHead>Route Number</TableHead>
+                                                                    <TableHead>Route Name</TableHead>
+                                                                </TableRow>
+                                                            </TableHeader>
+                                                            <TableBody>
+                                                                {routesNeedingInspection.map((route) => (
+                                                                    <TableRow
+                                                                        key={route.DocEntry}
+                                                                        className="cursor-pointer hover:bg-gray-50 transition-colors text-left"
+                                                                        onClick={() => navigate(`/outbound/${route.DocEntry}`)}
+                                                                    >
+                                                                        <TableCell className="font-semibold">
+                                                                            {route.DocEntry}
+                                                                        </TableCell>
+                                                                        <TableCell>{route.U_Title}</TableCell>
+                                                                    </TableRow>
+                                                                ))}
+                                                            </TableBody>
+                                                        </Table>
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center justify-center h-full p-8 bg-green-50 border border-green-200 rounded-xl shadow-md mx-auto max-w-md">
+                                                <svg
+                                                    xmlns="http://www.w3.org/2000/svg"
+                                                    className="h-16 w-16 text-green-500 mb-4"
+                                                    viewBox="0 0 20 20"
+                                                    fill="currentColor"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                                <h2 className="text-3xl font-bold text-green-700 mb-2">
+                                                    Inspection Complete
+                                                </h2>
+                                                <p className="text-green-600 text-center">
+                                                    Congratulations! All routes have been successfully inspected.
+                                                </p>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </CardContent>

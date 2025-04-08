@@ -103,7 +103,7 @@ export function ModernNavbar() {
                       {item.name}
                     </a>
                   ))}
-                  <Button className="mt-4">Logout</Button>
+                  <Button onClick={handleLogout} className="mt-4">Logout</Button>
                 </div>
               </SheetContent>
             </Sheet>
